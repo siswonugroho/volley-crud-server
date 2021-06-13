@@ -2,93 +2,100 @@
 
 defined('BASEPATH') or exit('No direct script access allowed');
 
-use chriskacerguis\RestServer\RestController;
-
-class Users extends RestController
+class Users extends CI_Controller
 {
+ 
   function __construct()
   {
     parent::__construct();
     $this->load->model('Users_model');
   }
 
-  public function index_get()
+  private function send_response($data, $response_code = null) {
+    $this->output
+    ->set_content_type('application/json')
+    ->set_output(json_encode($data));
+    if (!is_null($response_code)) {
+      http_response_code($response_code);
+    }
+  }
+
+  public function index()
   {
-    $id = $this->get('id');
+    $id = $this->input->get('id');
     if (is_null($id)) {
       $data['users'] = $this->Users_model->getUsers()->result();
     } else {
       $data['users'] = $this->Users_model->getUserById('tm_user', $id)->result();
     }
     if ($data['users']) {
-      $this->response($data['users'], RestController::HTTP_OK);
+      $this->send_response($data['users'], 200);;
     } else {
-      $this->response([
-        'status' => false,
+      $this->send_response([
         'message' => 'ID tidak ditemukan'
-      ], RestController::HTTP_NOT_FOUND);
+      ], 404);
     }
   }
 
-  public function index_delete()
+  public function apiDelete()
   {
-    $id = $this->delete('id');
+    $id = filter_var($this->input->post('id'), FILTER_SANITIZE_STRING);
     if (is_null($id)) {
-      $this->response([
+      $this->send_response([
         'message' => 'Harap masukkan ID'
-      ], RestController::HTTP_NOT_ACCEPTABLE);
+      ], 400);
     } else {
       if ($this->Users_model->deleteUser('tm_user', $id) > 0) {
-        $this->response([
+        $this->send_response([
           'message' => 'Data berhasil dihapus'
-        ], RestController::HTTP_OK);
+        ], 200);
       } else {
-        $this->response([
+        $this->send_response([
           'message' => 'ID tidak ditemukan'
-        ], RestController::HTTP_BAD_REQUEST);
+        ], 404);
       }
     }
   }
 
-  public function index_post()
+  public function apiInsert()
   {
     $data = [
-      'nama' => filter_var($this->post('nama'), FILTER_SANITIZE_STRING),
-      'username' => filter_var($this->post('username'), FILTER_SANITIZE_STRING),
-      'password' => filter_var($this->post('password'), FILTER_SANITIZE_STRING),
-      'grup' => filter_var($this->post('grup'), FILTER_SANITIZE_STRING),
+      'nama' => filter_var($this->input->post('nama'), FILTER_SANITIZE_STRING),
+      'username' => filter_var($this->input->post('username'), FILTER_SANITIZE_STRING),
+      'password' => filter_var($this->input->post('password'), FILTER_SANITIZE_STRING),
+      'grup' => filter_var($this->input->post('grup'), FILTER_SANITIZE_STRING),
     ];
 
     if ($this->Users_model->createUser('tm_user', $data) > 0) {
-      $this->response([
+      $this->send_response([
         'message' => 'Data berhasil ditambahkan'
-      ], RestController::HTTP_CREATED);
+      ], 201);
     } else {
-      $this->response([
+      $this->send_response([
         'message' => 'Gagal menambahkan data'
-      ], RestController::HTTP_BAD_REQUEST);
+      ], 400);
     }
   }
 
-  public function index_put()
+  public function apiUpdate()
   {
-    $id = $this->put('id');
+    $id = filter_var($this->input->post('id'), FILTER_SANITIZE_STRING);
 
     $data = [
-      'nama' => filter_var($this->put('nama'), FILTER_SANITIZE_STRING),
-      'username' => filter_var($this->put('username'), FILTER_SANITIZE_STRING),
-      'password' => filter_var($this->put('password'), FILTER_SANITIZE_STRING),
-      'grup' => filter_var($this->put('grup'), FILTER_SANITIZE_STRING),
+      'nama' => filter_var($this->input->post('nama'), FILTER_SANITIZE_STRING),
+      'username' => filter_var($this->input->post('username'), FILTER_SANITIZE_STRING),
+      'password' => filter_var($this->input->post('password'), FILTER_SANITIZE_STRING),
+      'grup' => filter_var($this->input->post('grup'), FILTER_SANITIZE_STRING),
     ];
 
     if ($this->Users_model->updateUser('tm_user', $data, $id) > 0) {
-      $this->response([
+      $this->send_response([
         'message' => 'Data berhasil diedit'
-      ], RestController::HTTP_OK);
+      ], 201);
     } else {
-      $this->response([
+      $this->send_response([
         'message' => 'Gagal mengedit data'
-      ], RestController::HTTP_BAD_REQUEST);
+      ], 400);
     }
   }
 
