@@ -33,7 +33,7 @@ class Users extends CI_Controller
     } else {
       $this->send_response([
         'message' => 'ID tidak ditemukan'
-      ], 404);
+      ], 200);
     }
   }
 
@@ -43,7 +43,7 @@ class Users extends CI_Controller
     if (is_null($id)) {
       $this->send_response([
         'message' => 'Harap masukkan ID'
-      ], 400);
+      ], 200);
     } else {
       if ($this->Users_model->deleteUser('tm_user', $id) > 0) {
         $this->send_response([
@@ -52,7 +52,7 @@ class Users extends CI_Controller
       } else {
         $this->send_response([
           'message' => 'ID tidak ditemukan'
-        ], 404);
+        ], 200);
       }
     }
   }
@@ -73,7 +73,7 @@ class Users extends CI_Controller
     } else {
       $this->send_response([
         'message' => 'Gagal menambahkan data'
-      ], 400);
+      ], 200);
     }
   }
 
@@ -95,7 +95,7 @@ class Users extends CI_Controller
     } else {
       $this->send_response([
         'message' => 'Gagal mengedit data'
-      ], 400);
+      ], 200);
     }
   }
 
